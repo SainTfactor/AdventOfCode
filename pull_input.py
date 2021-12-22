@@ -2,10 +2,10 @@
 import requests
 import argparse
 
-session_id="53616c7465645f5f6c99a02fcc8d6aa806234692c2cf31a5d8d2ac04dffbcfd693e1db11f5c35d46f7eb6838a15f63f7"
-
 def get_input(day):
-    global session_id
+    session_id = ""
+    with open("session_id.dat", "r") as f:
+        session_id=f.read().strip()
     s = requests.Session()
     s.cookies.set("session", session_id, domain="adventofcode.com")
     data = s.get("https://adventofcode.com/2021/day/{}/input".format(day))
