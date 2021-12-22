@@ -28,6 +28,8 @@ Sample file included here.
 
 To get the session id, just look in your cookies in your browser.  It should be keyed as "session" and just be a long hex string.
 
+If you're gonna fork this, or just add it to your project, I'd recommend running `git update-index --assume-unchanged session_id.dat`, so that you don't end up committing your session id to git.  Not a lot someone can do with it really, but still.  Good security practices.
+
 This left me with a pickle when it came to formatting the little examples though, so I made parse_tiny_input.py.  To use that, do the following:
 
 ```
