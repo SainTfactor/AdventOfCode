@@ -21,7 +21,7 @@ I've decided that cyberchef was cumbersome, so I decided to create a magic pytho
 That script lets you just provide a day, and it will reach out and pull the stuff for you.
 It even massages it into a format that doesn't suck to work with.
 
-Syntax is `./pull_input.py -d <your target day> > data.py`
+Syntax is `./pull_input.py -d <your_target_day> > data.py`
 
 Only caveat is that you need to pull your session id out of the browser, and drop that into a file called session_id.dat.
 Sample file included here.
