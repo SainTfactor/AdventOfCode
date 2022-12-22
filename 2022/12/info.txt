@@ -1,0 +1,8 @@
+The outputs for these are a little weird.  For part one, it just shows the whole grid, and you do a:
+./solve.py | grep -oP 'E\d+'
+to get the answer (the number after the 'E').
+For part 2, you do a:
+./solve.py | grep -oP 'a\d+' | sort -n | grep -v 'a1' | head -1
+and take the number after the 'a'
+
+Part one is commented out for now.  To get the answer you have to toggle the comment blocks.
