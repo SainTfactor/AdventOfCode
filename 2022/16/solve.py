@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+from itertools import permutations
 from data import data
 
-data = {
+# 1651
+wdata = {
   "AA" : { "rate" : 0, "neighbors" : [ "DD", "II", "BB" ] },
   "BB" : { "rate" : 13, "neighbors" : [ "CC", "AA" ] },
   "CC" : { "rate" : 2, "neighbors" : [ "DD", "BB" ] },
@@ -13,6 +15,15 @@ data = {
   "II" : { "rate" : 0, "neighbors" : [ "AA", "JJ" ] },
   "JJ" : { "rate" : 21, "neighbors" : [ "II" ] }
 }
+
+# 607
+wdata = {
+  "AA" : { "rate" : 0, "neighbors" : [ "BB", "CC", "DD" ] },
+  "BB" : { "rate" : 1, "neighbors" : [ "AA" ] },
+  "CC" : { "rate" : 1, "neighbors" : [ "AA" ] },
+  "DD" : { "rate" : 20, "neighbors" : [ "AA" ] }
+}
+
 
 for d in data:
   data[d]["opened"] = False
@@ -38,9 +49,32 @@ def decide_target(current_loc, remaining_time):
     pot_value = (remaining_time - get_distance(current_loc, gv)) * data[gv]["rate"]
     print("AA to {}: {}".format(gv, pot_value))
 
-decide_target(start_point, 30)
-for step in range(30):
-  pass
+turns = permutations(good_valves)
+
+biggest=0
+route = None
+for tgts in turns:
+  current_loc = start_point
+  steps = 30
+  output = 0
+  for step in tgts:
+    dst = get_distance(current_loc, step)
+    #print("{}, {}, {}".format(current_loc, step, dst))
+    steps -= dst + 1
+    if steps < 0:
+      break
+    output += steps*data[step]["rate"]
+    current_loc = step
+    #print("{}, {}, {}".format(30 - steps + 1, data[step]["rate"], output))
+  #print("{} - {}".format(tgts, output))
+  if biggest < output:
+    print(output)
+    biggest = output
+    route = tgts
+
+print("-"*100)
+print(biggest)
+print(route)
 
 # --------------------- Part 2 --------------------- #
 
