@@ -1,5 +1,7 @@
+from copy import deepcopy
 from pathlib import Path
 import re
+import statistics
 
 import graphviz
 from matplotlib import colormaps
@@ -12,33 +14,59 @@ class Pipelines:
         self.player_location = None
         self.clock = 0
         self.max_clock = 30
+        self.total_value = 0
+        self.moves = []
         for line in input_text.splitlines():
             valve = Valve.parse_input(line)
             self.valves[valve.name] = valve
             if self.player_location is None:
                 self.player_location = valve.name
+        self.moves.append(self.player_location)
         self.calc_distances()
-        self.color_map = colormaps.get_cmap('plasma').resampled(self.max_potential + 1)
+
+    def ranked_potentials(self, standard_deviations=2):
+        potentials = []
+        potential_values = []
+        for valve in self.valves.values():
+            if valve.potential > 0:
+                potentials.append(valve)
+                potential_values.append(valve.potential)
+        potentials = sorted(potentials, key=lambda v: v.potential, reverse=True)
+        if len(potentials) <= 0:
+            return []
+        if len(potentials) == 1:
+            return potentials
+        if standard_deviations is not None:
+            standard_deviation = statistics.stdev(potential_values)
+            new_potentials = [valve for valve in potentials if valve.potential >= standard_deviation * standard_deviations]
+        if len(potentials) <= 0:
+            pass
+        else:
+            potentials = new_potentials
+        return potentials
 
     def move(self, name):
-        a , b = self.player_location, name
-        if self.valves[a].name in self.valves[b].connections and self.valves[b] in self.valves[a].connections:
-            raise Exception(f'Connection not found between {a} and {b}')
+        destination_valve = self.valves[name]
+        for _ in range(destination_valve.distance):
+            self.tick()
         self.player_location = name
-        self.tick()
+        self.moves.append(name)
+        self.calc_distances()
 
     def open_valve(self):
         valve = self.valves[self.player_location]
         if valve.open:
-            raise Exception(f'Valve {valve.name} is already open')
+            raise Exception(f'Valve {valve.name} is already open. Moves: {self.moves}')
         else:
             self.tick()
             valve.open = True
 
     def tick(self):
+        if self.clock >= self.max_clock:
+            raise Exception('Max clock cycles reached.')
         self.clock += 1
-        for valve in self.valves.values():
-            valve.tick()
+        self.total_value = sum([valve.tick() for valve in self.valves.values()])
+            
 
     def calc_distances(self):
         queue = [self.player_location]
@@ -53,19 +81,24 @@ class Pipelines:
                     queue.append(neighbor)
                     checked.append(neighbor)
                     self.valves[neighbor].distance = self.valves[location].distance + 1
-                    self.valves[neighbor].potential = (self.valves[neighbor].flow_rate * self.max_clock) - ((self.valves[neighbor].distance + 1) * self.valves[neighbor].flow_rate)
+                    if self.valves[neighbor].open:
+                        self.valves[neighbor].potential = 0
+                    else:
+                        self.valves[neighbor].potential = max([(self.valves[neighbor].flow_rate * (self.max_clock - self.clock)) - ((self.valves[neighbor].distance + 1) * self.valves[neighbor].flow_rate), 0])
                     self.max_potential = max([self.max_potential, self.valves[neighbor].potential])
 
         while queue:
             location = queue.pop(0)
             visit_neighbors(location)   
+        
+        self.color_map = colormaps.get_cmap('plasma').resampled(self.max_potential + 1)
                 
 
     def graph(self):
-        dot = graphviz.Graph(format='svg')
-        dot.attr(bgcolor='black')
+        dot = graphviz.Graph(format='svg', filename=f'out/pl_{self.clock}_{self.player_location}')
+        dot.attr(bgcolor='black', label=f'[ CLOCK: {self.clock} | TOTAL VALUE: {self.total_value} | MOVES: {self.moves} ]', fontcolor='#dddddd', fontsize='10', fontname='Courier')
         dot.strict = True
-        self.valves[self.player_location].open = True
+
         for  name, valve in self.valves.items():
             if name == self.player_location:
                 shape = 'diamond'
@@ -110,13 +143,33 @@ class Valve:
             return 0
 
 
-def get_paths(pipeline: Pipelines):
-    valves = pipeline.valves
-    current_valve = valves[pipeline.player_location]
-    connections = [valves[name] for name in current_valve.connections]
-
-
 if __name__ == '__main__':
     data = Path('input.txt').read_text()
-    pl = Pipelines(data)
-    pl.graph()
+    #pl = Pipelines(data)
+    #pl.graph()
+    #valve_branches = pl.ranked_potentials()
+    queue = [Pipelines(data)]
+    #raise Exception()
+    results = {}
+    while queue:
+        print(len(queue))
+        pl = queue.pop(0)
+        #pl.graph()
+        for valve in pl.ranked_potentials():
+            pl_copy = deepcopy(pl)
+            pl_copy.move(valve.name)
+            pl_copy.open_valve()
+            queue.append(pl_copy)
+        results[tuple(pl.moves)] = pl.total_value
+
+    with open('results.txt', 'w') as f:
+        f.write(repr(results))
+    best_move = None
+    max_result_value = 0
+    for move, value in results.items():
+        if value > max_result_value:
+            max_result_value = value
+            best_move = move
+    print(best_move)
+    print(max_result_value)
+
