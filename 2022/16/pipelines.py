@@ -2,10 +2,11 @@ from copy import deepcopy
 from collections import defaultdict
 from pathlib import Path
 import re
-import statistics
+from time import time
 
 import graphviz
 from matplotlib import colormaps
+
 
 class MaxCyclesReached(Exception):
     pass
@@ -14,7 +15,7 @@ class MaxCyclesReached(Exception):
 class Pipelines:
     def __init__(self, input_text):
         self.valves = {}
-        self.player_location = None
+        self.player_location = 'AA'
         self.clock = 0
         self.max_clock = 30
         self.total_value = 0
@@ -23,8 +24,6 @@ class Pipelines:
         for line in input_text.splitlines():
             valve = Valve.parse_input(line)
             self.valves[valve.name] = valve
-            if self.player_location is None:
-                self.player_location = valve.name
         self.moves.append(self.player_location)
         self.calc_distances()
 
@@ -34,8 +33,8 @@ class Pipelines:
             if valve.potential > 0:
                 potentials.append(valve)
         potentials = sorted(potentials, key=lambda v: v.potential, reverse=True)
-        if len(potentials) > 4:
-            potentials = potentials[0:4]
+        if len(potentials) > 9:
+            potentials = potentials[0:9]
         return potentials
 
 
@@ -141,12 +140,15 @@ class Valve:
 
 
 if __name__ == '__main__':
-    data = Path('sample_input.txt').read_text()
+    data = Path('input.txt').read_text()
     pl = Pipelines(data)
     queue = [Pipelines(data)]
     results = {}
+    next_time = time() + 3
     while queue:
-        print(len(queue))
+        if time() > next_time:
+            next_time = time() + 3
+            print(len(queue))
         pl = queue.pop(0)
         ranked_potentials = pl.ranked_potentials()
         if ranked_potentials:
