@@ -1,4 +1,5 @@
 from copy import deepcopy
+from collections import defaultdict
 from pathlib import Path
 import re
 import statistics
@@ -6,6 +7,8 @@ import statistics
 import graphviz
 from matplotlib import colormaps
 
+class MaxCyclesReached(Exception):
+    pass
 
 
 class Pipelines:
@@ -16,6 +19,7 @@ class Pipelines:
         self.max_clock = 30
         self.total_value = 0
         self.moves = []
+        self.open_times = []
         for line in input_text.splitlines():
             valve = Valve.parse_input(line)
             self.valves[valve.name] = valve
@@ -24,34 +28,26 @@ class Pipelines:
         self.moves.append(self.player_location)
         self.calc_distances()
 
-    def ranked_potentials(self, standard_deviations=2):
+    def ranked_potentials(self):
         potentials = []
-        potential_values = []
         for valve in self.valves.values():
             if valve.potential > 0:
                 potentials.append(valve)
-                potential_values.append(valve.potential)
         potentials = sorted(potentials, key=lambda v: v.potential, reverse=True)
-        if len(potentials) <= 0:
-            return []
-        if len(potentials) == 1:
-            return potentials
-        if standard_deviations is not None:
-            standard_deviation = statistics.stdev(potential_values)
-            new_potentials = [valve for valve in potentials if valve.potential >= standard_deviation * standard_deviations]
-        if len(potentials) <= 0:
-            pass
-        else:
-            potentials = new_potentials
+        if len(potentials) > 4:
+            potentials = potentials[0:4]
         return potentials
+
 
     def move(self, name):
         destination_valve = self.valves[name]
+        distance = destination_valve.distance
         for _ in range(destination_valve.distance):
             self.tick()
         self.player_location = name
         self.moves.append(name)
         self.calc_distances()
+        return distance
 
     def open_valve(self):
         valve = self.valves[self.player_location]
@@ -60,10 +56,11 @@ class Pipelines:
         else:
             self.tick()
             valve.open = True
+            self.open_times.append(self.clock)
 
     def tick(self):
         if self.clock >= self.max_clock:
-            raise Exception('Max clock cycles reached.')
+            raise MaxCyclesReached('Max clock cycles reached.')
         self.clock += 1
         self.total_value = sum([valve.tick() for valve in self.valves.values()])
             
@@ -84,7 +81,7 @@ class Pipelines:
                     if self.valves[neighbor].open:
                         self.valves[neighbor].potential = 0
                     else:
-                        self.valves[neighbor].potential = max([(self.valves[neighbor].flow_rate * (self.max_clock - self.clock)) - ((self.valves[neighbor].distance + 1) * self.valves[neighbor].flow_rate), 0])
+                        self.valves[neighbor].potential = max([(self.valves[neighbor].flow_rate * (self.max_clock - self.clock - 1)) - ((self.valves[neighbor].distance + 1) * self.valves[neighbor].flow_rate), 0])
                     self.max_potential = max([self.max_potential, self.valves[neighbor].potential])
 
         while queue:
@@ -95,7 +92,7 @@ class Pipelines:
                 
 
     def graph(self):
-        dot = graphviz.Graph(format='svg', filename=f'out/pl_{self.clock}_{self.player_location}')
+        dot = graphviz.Graph(format='svg', filename=f'out/pl_{self.clock}_{"_".join(self.moves)}')
         dot.attr(bgcolor='black', label=f'[ CLOCK: {self.clock} | TOTAL VALUE: {self.total_value} | MOVES: {self.moves} ]', fontcolor='#dddddd', fontsize='10', fontname='Courier')
         dot.strict = True
 
@@ -144,32 +141,39 @@ class Valve:
 
 
 if __name__ == '__main__':
-    data = Path('input.txt').read_text()
-    #pl = Pipelines(data)
-    #pl.graph()
-    #valve_branches = pl.ranked_potentials()
+    data = Path('sample_input.txt').read_text()
+    pl = Pipelines(data)
     queue = [Pipelines(data)]
-    #raise Exception()
     results = {}
     while queue:
         print(len(queue))
         pl = queue.pop(0)
-        #pl.graph()
-        for valve in pl.ranked_potentials():
-            pl_copy = deepcopy(pl)
-            pl_copy.move(valve.name)
-            pl_copy.open_valve()
-            queue.append(pl_copy)
-        results[tuple(pl.moves)] = pl.total_value
+        ranked_potentials = pl.ranked_potentials()
+        if ranked_potentials:
+            for valve in ranked_potentials:
+                pl_copy = deepcopy(pl)
+                distance = pl_copy.move(valve.name)
+                pl_copy.open_valve()
+                queue.append(pl_copy)
+        else:
+            while True:
+                try:
+                    pl.tick()
+                except MaxCyclesReached:
+                    results[','.join(pl.moves)] = pl
+                    break      
 
-    with open('results.txt', 'w') as f:
-        f.write(repr(results))
     best_move = None
     max_result_value = 0
-    for move, value in results.items():
-        if value > max_result_value:
-            max_result_value = value
+    best_pl = None
+    for move, pl in results.items():
+        if pl.total_value > max_result_value:
+            max_result_value = pl.total_value
             best_move = move
+            best_pl = pl
     print(best_move)
     print(max_result_value)
+    print(best_pl.open_times)
+    print(best_pl.moves)
+    best_pl.graph()
 
