@@ -8,7 +8,7 @@ blocks.append([(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)]) # backwards L block
 blocks.append([(0, 0), (0, 1), (0, 2), (0, 3)]) # vertical block
 blocks.append([(0, 0), (0, 1), (1, 0), (1, 1)]) # cube block
 
-data = '>>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>'
+#data = '>>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>'
 
 grid = [(0,0), (1,0), (2,0), (3,0), (4,0), (5,0), (6,0)]
 
@@ -47,14 +47,38 @@ rocks_mod = 5
 cycle_current = 0
 cycle_mod = len(data)
 
+beat_note = 5 # sample data
+beat_note = 17 # actual data
+
+test_hits=0
+test_cycles=2
+beat_height_per=-1
+rocks_per_beat=-1
+
+tallest=1000000000000
 print("cycle - height - change - x_more_rocks")
-while rocks_fallen < 1000000000000:
+while rocks_fallen < tallest:
   rocks_in_beat += 1
-  #print(rocks_fallen%rocks_mod, cycle_current%cycle_mod)
-  if cycle_current%cycle_mod == 5 and rocks_fallen%rocks_mod == 0:
+  if False: # rocks_fallen%rocks_mod == 0: # uncomment to find beat note
+    print(rocks_fallen%rocks_mod, cycle_current%cycle_mod)
+  if cycle_current%cycle_mod == beat_note and rocks_fallen%rocks_mod == 0:
     obh = beat_height
     beat_height = max([i[1] for i in grid])
     print("{} - {} - {} - {}".format(cycle_current, beat_height, beat_height - obh, rocks_in_beat-orpb))
+    if rocks_per_beat == rocks_in_beat-orpb and beat_height_per == beat_height - obh:
+      test_hits += 1
+    else:
+      test_hits=1
+      rocks_per_beat = rocks_in_beat-orpb
+      beat_height_per = beat_height-obh
+
+    if test_hits == test_cycles:
+      print("MAXIMUM OVERDRIVE!!!!!!")
+      multiplier = int((tallest - rocks_fallen - rocks_per_beat)/rocks_per_beat)
+      rocks_fallen += rocks_per_beat*multiplier
+      add_to_heights = beat_height_per*multiplier
+      grid = [(i[0],i[1]+add_to_heights) for i in grid]
+
     orpb = rocks_in_beat
   current_height = max([i[1] for i in grid])
   current_rock = make_rock(blocks[rocks_fallen%rocks_mod], current_height)
