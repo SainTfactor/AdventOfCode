@@ -5,7 +5,7 @@ from data import blueprints
 #  You never need more than the biggest cost of each type of robot, as that means you can make one of cost per turn.
 #    eg. You never need more than 4 ore robots, 14 clay robots, and 7 obsidian robots in blueprint 1.  After that, just do geode robots.
 
-blueprints = [
+bblueprints = [
   { 
     "ore_robot" : { "ore" : 4 }, 
     "clay_robot" : { "ore" : 2 }, 
@@ -49,10 +49,10 @@ def biggest_bois(states, blueprint, max_count, time_remaining):
   clay_ratio = max([1,blueprint["obsidian_robot"]["clay"]/blueprint["obsidian_robot"]["ore"]])
   def matrix_reloaded(state):
     val = 0
-    val += (state["ore_robot"] * time_remaining + state["ore"]) * ore_ratio
-    val += (state["clay_robot"] * time_remaining + state["clay"]) * clay_ratio
-    val += (state["obsidian_robot"] * time_remaining + state["obsidian"]) * (10 + ore_ratio + clay_ratio)
-    val += (state["geode_robot"] * time_remaining + state["geode"]) * (100 + ore_ratio + clay_ratio)
+    val += (state["ore_robot"] * time_remaining * 5 + state["ore"]) * ore_ratio
+    val += (state["clay_robot"] * time_remaining * 5 + state["clay"]) * clay_ratio
+    val += (state["obsidian_robot"] * time_remaining * 5 + state["obsidian"]) * (10 + ore_ratio + clay_ratio)
+    val += (state["geode_robot"] * time_remaining * 5 + state["geode"]) * (100 + ore_ratio + clay_ratio)
     return val
     
   return sorted(states, reverse=True, key=matrix_reloaded)[0:max_count]
@@ -84,7 +84,6 @@ def advance_state(blueprint, states, time_remaining, max_count=40000):
       for cost in blueprint[robot_name]:
          new_state[cost] -= blueprint[robot_name][cost]
       new_states.append(new_state)
-  print("---{}".format(min([i["ore_robot"] for i in new_states])))
   return biggest_bois(new_states, blueprint, max_count, time_remaining)
     
 
