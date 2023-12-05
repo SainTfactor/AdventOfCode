@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from data import data
 
-data = []
+data = [
+    #here
+]
 
 print(data)
 
 # --------------------- Part 2 --------------------- #
 
-print(data)
