@@ -4,7 +4,7 @@ import argparse
 def parse_puzzle_input(real_data=False):
   data_source = "real_data.txt" if real_data else "sample_data.txt"
   with open(data_source, "r") as f:
-    data = [i.strip() for i in f.readlines()]
+    data = [[j for j in i.strip()] for i in f.readlines()]
 
   # manipulate data
 
