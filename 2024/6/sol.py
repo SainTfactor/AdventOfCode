@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import traceback
 from grid import Grid
 
 
@@ -35,20 +36,23 @@ if __name__ == "__main__":
   # --------------------- Part 1 --------------------- #
   
   my_grid = Grid(data)
-
-  our_guy = (0,0)
-  direction = Grid.Directions.UP
-
-  for node, x, y in my_grid:
-    if node == "^":
-      our_guy = (x,y)
-
-  try:
-    while True:
+  
+  def do_thing(my_grid, max_run=200000):
+    our_guy = (0,0)
+    direction = Grid.Directions.UP
+  
+    for node, x, y in my_grid:
+      if node == "^":
+        our_guy = (x,y)
+  
+    for i in range(max_run):
       new_guy = make_move(our_guy, direction, my_grid)
       if new_guy == our_guy:
         direction = Grid.Directions.turn_right(direction)
       our_guy = new_guy
+
+  try:
+    do_thing(my_grid)
   except Exception as e:
     #raise e
     #my_grid.print()
@@ -62,6 +66,26 @@ if __name__ == "__main__":
 
   # --------------------- Part 2 --------------------- #
 
-
-
+  print(len(data) * len(data[0]))
+   
+  prog = 0
+  good_count = 0
+  data = parse_puzzle_input(args.real)
+  my_grid = Grid(data)
+  for node, x, y in my_grid:
+    prog += 1
+    if prog % 10 == 0:
+      print(prog)
+    data = parse_puzzle_input(args.real)
+    temp_grid = Grid(data)
+    temp_grid.set(x,y,"#")
+    ends=False
+    try:
+      do_thing(temp_grid)
+    except Exception as e:
+      ends=True
+    if not ends:
+      good_count += 1
+  print(good_count)
+      
 
