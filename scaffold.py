@@ -23,15 +23,15 @@ if __name__ == "__main__":
   parser.add_argument("-r", "--real", action="store_true", help="Use real data instead of sample data.")
   args = parser.parse_args()
 
-  data = parse_puzzle_input(args.real)
-
   # --------------------- Part 1 --------------------- #
 
+  data = parse_puzzle_input(args.real)
 
 
 
   # --------------------- Part 2 --------------------- #
 
+  data = parse_puzzle_input(args.real)
 
 
 
