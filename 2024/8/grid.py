@@ -42,9 +42,9 @@ class Grid:
   
   def set(self, x, y, new_value):
     grid = self._grid
-    if y == len(grid):
+    if y >= len(grid):
       raise Exception #out of bounds
-    if x == len(grid[0]):
+    if x >= len(grid[0]):
       raise Exception #out of bounds
     if x < 0 or y < 0:
       raise Exception #out of bounds

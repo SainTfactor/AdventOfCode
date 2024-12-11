@@ -32,9 +32,9 @@ class Grid:
   # 0,0 is bottom left, so translation is needed
   def at(self, x,y):
     grid = self._grid
-    if y == len(grid):
+    if y >= len(grid):
       return None #out of bounds
-    if x == len(grid[0]):
+    if x >= len(grid[0]):
       return None #out of bounds
     if x < 0 or y < 0:
       return None #out of bounds
@@ -42,9 +42,9 @@ class Grid:
   
   def set(self, x, y, new_value):
     grid = self._grid
-    if y == len(grid):
+    if y >= len(grid):
       raise Exception #out of bounds
-    if x == len(grid[0]):
+    if x >= len(grid[0]):
       raise Exception #out of bounds
     if x < 0 or y < 0:
       raise Exception #out of bounds
