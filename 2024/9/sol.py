@@ -64,5 +64,53 @@ if __name__ == "__main__":
   # --------------------- Part 2 --------------------- #
 
 
+  _files, _spaces = parse_puzzle_input(args.real)
+  files = {}
+  spaces = {}
+  for f in range(len(_files)):
+    files[f] = { "size" : _files[f], "moved" : False }
+  for s in range(len(_spaces)):
+    spaces[s] = { "size" : _spaces[s], "occupants": [], "remaining_space" : _spaces[s] }
+
+  for f in range(len(_files)-1, 0, -1):
+    for s in range(f):
+      if files[f]["size"] <= spaces[s]["remaining_space"]:
+        files[f]["moved"] = True
+        spaces[s]["remaining_space"] = spaces[s]["remaining_space"] - files[f]["size"]
+        spaces[s]["occupants"].append(f)
+        break
+
+  #for f in files:
+  #  print(f,files[f])
+  #print("--------")
+  #for s in spaces:
+  #  print(s,spaces[s])
+
+  output = []
+  for i in range(len(_spaces)):
+    appender = "." if files[i]["moved"] else i
+    for _ in range(files[i]["size"]):
+      output.append(appender)
+
+    for occ in spaces[i]["occupants"]:
+      for f in range(files[occ]["size"]):
+        output.append(occ)
+
+    for s in range(spaces[i]["remaining_space"]):
+      output.append(".")
+
+  last_file = len(_spaces)
+  appender = "." if files[last_file]["moved"] else last_file
+  for _ in range(files[last_file]["size"]):
+    output.append(appender)
 
 
+  #print(output)
+  #print("".join([str(i) for i in output]))
+  chksum = 0
+  counter = 0
+  for i in output:
+    if i != ".":
+      chksum += i * counter
+    counter += 1
+  print(chksum)
