@@ -21,6 +21,12 @@ class Grid:
 
     def turn_left(direction):
       return (direction - 2) % 8
+    
+    def half_turn_right(direction):
+      return (direction + 1) % 8
+
+    def half_turn_left(direction):
+      return (direction - 1) % 8
 
   def __init__(self, grid):
     self._grid = grid
@@ -106,4 +112,20 @@ class Grid:
       yield self.next(x,y,direction)
       direction = Grid.Directions.turn_right(direction)
 
+  def all_neighbors(self, x, y):
+    direction = Grid.Directions.UP
+    for i in range(8):
+      yield self.next(x,y,direction)
+      direction = Grid.Directions.half_turn_right(direction)
+
+  def all_regions(self):
+    regions = []
+    all_matched_nodes = []
+    for node, x, y in self:
+      if not (x,y) in all_matched_nodes:
+        region = self.region(x,y)
+        regions.append(region)
+        for item in region:
+          all_matched_nodes.append(item)
+    return regions
 
