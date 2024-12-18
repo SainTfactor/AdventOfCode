@@ -37,4 +37,4 @@ if __name__ == "__main__":
 
     #print("#!/usr/bin/env python3")
     #choose_display_type(data)
-    print(data)
+    print(data, end="")
