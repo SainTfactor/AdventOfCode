@@ -84,8 +84,8 @@ if __name__ == "__main__":
   my_grid = reset_grid(args.real)
   all_robots = parse_puzzle_input(args.real)
 
-  print("Doesn't work with sample data.")
-  print("This shows you when 5 things are horizontally aligned, so you can spot check if there's a tree.")
+  print("Doesn't work with sample data.  First result should be the tree for the real data")
+  print("This shows you when 10 things are horizontally aligned, so you can spot check if there's a tree.")
 
   max_x, max_y = my_grid.maxs()
   num_iter = 0
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         seq += 1
       else:
         seq = 0
-      if seq > 5:
+      if seq > 10:
         good = True
         break
 
@@ -113,21 +113,6 @@ if __name__ == "__main__":
       input("Press enter for next...")
     my_grid = reset_grid(args.real)
     num_iter += 1
-
-
-  cutoff_x = int(max_x/2)
-  cutoff_y = int(max_y/2)
-  q1, q2, q3, q4 = 0, 0, 0, 0
-  for node,x,y in my_grid:
-    if x < cutoff_x and y > cutoff_y:
-      q1 += len(node["robots"])
-    elif x > cutoff_x and y > cutoff_y:
-      q2 += len(node["robots"])
-    elif x < cutoff_x and y < cutoff_y:
-      q3 += len(node["robots"])
-    elif x > cutoff_x and y < cutoff_y:
-      q4 += len(node["robots"])
-
-  print(q1,q2,q3,q4)
-  print(q1*q2*q3*q4)
+    if num_iter % 100 == 0:
+      print(num_iter)
 
