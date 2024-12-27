@@ -18,6 +18,14 @@ def parse_puzzle_input(real_data=False):
   return [cleaner(i) for i in data]
 
 
+def dijkstrafy(grid, start_node):
+  for node, x, y in grid:
+    node["visited"] = False
+    if (x,y) == start_node:
+      node["distance"] = 0
+    else:
+      node["distance"] = None
+
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(prog="AoC Solver", description="This is a scaffold of an Advent of Code solver program.")
@@ -35,6 +43,34 @@ if __name__ == "__main__":
       elif node["tile"] == "E":
         end = (x,y)
     return start, end
+
+  def update_neighbor_function(n,x,y):
+    n["visited"] = True
+    direction = current_direction
+    for turncost in [1001,2001,1001,1]: # left, back, right, straight
+      direction = Grid.Directions.turn_left(direction)
+      next_node, next_x, next_y = grid.next(*start, direction)
+      stack.append({ "start" : (next_x, next_y), "current_total" : current_total + turncost, "current_direction" : direction, "previous" : start})
+      
+
+  def dijkstra_walk(grid, start, update=update_neighbor_function):
+    dijkstrafy(grid)
+    while any([not n["visited"] for n,x,y in grid]):
+      # get minimum node
+      min_grid = None
+      for n,x,y in grid:
+        if not n["visited"] and n["distance"] != None:
+          if min_grid != None and min_grid[0]["distance"] > n["distance"]:
+            min_grid = (n,x,y)
+
+      # update neighbors
+      update(*min_grid)
+      
+      
+
+
+
+
 
   # Had to reimplement iteratively, because you hit the recusion limit otherwise
   def walk_maze(grid, entry, ceiling=100000):
