@@ -129,3 +129,71 @@ class Grid:
           all_matched_nodes.append(item)
     return regions
 
+  def _create_cost_grid(self, start_node, obstacle_list = ["#"]):
+    self._cost_grid = Grid([[{ "tile" : item } for item in line] for line in self._grid])
+    for node, x, y in self._cost_grid:
+      node["visited"] = node["tile"] in obstacle_list 
+      if (x,y) == start_node:
+        node["distance"] = 0
+      else:
+        node["distance"] = None
+
+  def _simple_cost_function(self, node, x, y, obstacle_list = ["#"]):
+    node["visited"] = True
+    direction = Grid.Directions.UP
+    for _ in range(4):
+      next_node, next_x, next_y = grid.next(x, y, direction)
+      direction = Grid.Directions.turn_right(direction)
+      if not next_node["tile"] in obstacle_list:
+        if next_node["distance"] == None or next_node["distance"] > (1 + node["distance"]):
+          next_node["distance"] = 1 + node["distance"]
+
+
+  def calculate_path_costs(self, start, end=None, obstacle_list=["#"], cost_function=_simple_cost_function):
+    self._create_cost_grid(start, obstacle_list)
+    while any([not n["visited"] for n,x,y in self._cost_grid]):
+      # get minimum node
+      min_grid = None
+      for n,x,y in self._cost_grid:
+        if not n["visited"] and n["distance"] != None:
+          if min_grid == None or min_grid[0]["distance"] > n["distance"]:
+            min_grid = (n,x,y)
+
+      # update neighbors
+      cost_function(self._cost_grid, *min_grid)
+
+      if end != None and (x,y) == end:
+        return 
+
+  def path_cost_to(self, end):
+    if self._cost_grid == None:
+      raise Exception
+    return self._cost_grid.at(*end)["distance"]
+
+  def print_paths(self, end, valid_next_step_function=lambda cur,nxt: cur == nxt+1):
+    if self._cost_grid == None:
+      raise Exception
+    grid = self._cost_grid
+    point = grid.at(*end)
+    check_nodes = [(point, *end)]
+
+    while len(check_nodes) > 0:
+      node, x, y = check_nodes.pop()
+      node["path_part"] = True
+      cost = node["distance"]
+      direction = Grid.Directions.UP
+      for _ in range(4):
+        next_node, next_x, next_y = grid.next(x,y,direction)
+        direction = Grid.Directions.turn_right(direction)
+        if next_node["distance"] != None and  valid_next_step_function(cost, next_node["distance"]) and not "path_part" in next_node:
+          check_nodes.append((next_node, next_x, next_y))
+
+    for n,x,y in grid:
+      print("{},{} ({}): {}".format(x,y,n["tile"],n["distance"]))
+
+    grid.print(lambda x: "O" if "path_part" in x else x["tile"])
+
+  def calculate_cost_total(self, total_cost_function):
+    if self._cost_grid == None:
+      raise Exception
+    return total_cost_function(self._cost_grid)
