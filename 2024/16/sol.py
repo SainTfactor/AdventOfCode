@@ -120,7 +120,21 @@ if __name__ == "__main__":
 
   start, end = get_start_and_end(my_grid)
   
+
   def cost_function(grid, n, x, y):
+    def check_validity(grid, next_node, next_x, next_y, n, turncost, direction):
+      if next_node["tile"] == "#":
+        return False
+      if next_node["distance"] == None:
+        return True
+      if next_node["distance"] >= (turncost + n["distance"]):
+        return True
+      if (next_node["distance"] + 1000) == (turncost + n["distance"]):
+        nnn,nnx,nny = grid.next(next_x, next_y,direction)
+        if nnn["tile"] != "#" and (not nnn["visited"] or nnn["direction"] == next_node["direction"]):
+          return True
+      return False
+
     n["visited"] = True
     if not "direction" in n:
       n["direction"] = Grid.Directions.RIGHT
@@ -128,16 +142,15 @@ if __name__ == "__main__":
     for turncost in [1001,2001,1001,1]: # left, back, right, straight
       direction = Grid.Directions.turn_left(direction)
       next_node, next_x, next_y = grid.next(x, y, direction)
-      if next_node["tile"] != "#":
-        if next_node["distance"] == None or next_node["distance"] >= (turncost + n["distance"]):
-          next_node["distance"] = turncost + n["distance"]
-          next_node["direction"] = direction
-          if next_node["tile"] == "E" and next_node["direction"] != n["direction"]:
-            continue
-          if not "previous_nodes" in next_node:
-            next_node["previous_nodes"] = [(x,y)]
-          else:
-            next_node["previous_nodes"].append((x,y))
+      if check_validity(grid, next_node, next_x, next_y, n, turncost, direction):
+        next_node["distance"] = turncost + n["distance"]
+        next_node["direction"] = direction
+        if next_node["tile"] == "E" and next_node["direction"] != n["direction"]:
+          continue
+        if not "previous_nodes" in next_node:
+          next_node["previous_nodes"] = [(x,y)]
+        else:
+          next_node["previous_nodes"].append((x,y))
 
 
 
@@ -147,7 +160,9 @@ if __name__ == "__main__":
   final = my_grid.path_cost_to(end)
   print(final)
 
+  print("Path Print")
   my_grid.print_paths(end)#, valid_next_step_function=test_check)
+  print("Done")
 
   def total_cost(grid):
     ret_val = 0

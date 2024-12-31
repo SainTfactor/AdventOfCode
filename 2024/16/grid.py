@@ -194,7 +194,7 @@ class Grid:
       for _ in range(4):
         next_node, next_x, next_y = grid.next(x,y,direction)
         direction = Grid.Directions.turn_right(direction)
-        if next_node["distance"] != None and valid_next_step_function((node, x, y), (next_node, next_x, next_y)):
+        if next_node["distance"] != None and not "path_part" in next_node and valid_next_step_function((node, x, y), (next_node, next_x, next_y)):
           check_nodes.append((next_node, next_x, next_y))
 
     for n,x,y in grid:
