@@ -2,8 +2,8 @@
 import argparse
 from grid import Grid
 
-def parse_puzzle_input(real_data=False):
-  data_source = "real_data.txt" if real_data else "sample_data.txt"
+def parse_puzzle_input(real_data, sample_data_file):
+  data_source = "real_data.txt" if real_data else sample_data_file
   with open(data_source, "r") as f:
     data = [i.strip() for i in f.readlines()]
 
@@ -20,6 +20,7 @@ def parse_puzzle_input(real_data=False):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(prog="AoC Solver", description="This is a scaffold of an Advent of Code solver program.")
   parser.add_argument("-r", "--real", action="store_true", help="Use real data instead of sample data.")
+  parser.add_argument("-s", "--sample_file", default="sample_data.txt", help="Specify alternate name for sample data file.  Default: sample_data.txt")
   args = parser.parse_args()
 
   # --------------------- Part 1 --------------------- #
@@ -68,7 +69,7 @@ if __name__ == "__main__":
       
 
 
-  data = parse_puzzle_input(args.real)
+  data = parse_puzzle_input(args.real, args.sample_file)
   my_grid = Grid(data)
   my_grid.print(lambda x: x["tile"])
   
@@ -103,8 +104,8 @@ if __name__ == "__main__":
         end = (x,y)
     return start, end
   
-  def parse_puzzle_input(real_data=False):
-    data_source = "real_data.txt" if real_data else "sample_data.txt"
+  def parse_puzzle_input(real_data, sample_data_file):
+    data_source = "real_data.txt" if real_data else sample_data_file
     with open(data_source, "r") as f:
       data = [i.strip() for i in f.readlines()]
  
@@ -114,7 +115,7 @@ if __name__ == "__main__":
 
     return [cleaner(i) for i in data]
 
-  data = parse_puzzle_input(args.real)
+  data = parse_puzzle_input(args.real, args.sample_file)
   my_grid = Grid(data)
 
   start, end = get_start_and_end(my_grid)
@@ -128,19 +129,25 @@ if __name__ == "__main__":
       direction = Grid.Directions.turn_left(direction)
       next_node, next_x, next_y = grid.next(x, y, direction)
       if next_node["tile"] != "#":
-        if next_node["distance"] == None or next_node["distance"] > (turncost + n["distance"]):
+        if next_node["distance"] == None or next_node["distance"] >= (turncost + n["distance"]):
           next_node["distance"] = turncost + n["distance"]
           next_node["direction"] = direction
-          next_node["previous_node"] = (x,y)
+          if next_node["tile"] == "E" and next_node["direction"] != n["direction"]:
+            continue
+          if not "previous_nodes" in next_node:
+            next_node["previous_nodes"] = [(x,y)]
+          else:
+            next_node["previous_nodes"].append((x,y))
+
+
+
 
   my_grid.calculate_path_costs(start, cost_function=cost_function)
 
   final = my_grid.path_cost_to(end)
   print(final)
 
-  def val_np(cur, nxt):
-    return cur - 1 ==  nxt or cur - 1001 == nxt or cur + 999 == nxt
-  my_grid.print_paths(end,valid_next_step_function=val_np)
+  my_grid.print_paths(end)#, valid_next_step_function=test_check)
 
   def total_cost(grid):
     ret_val = 0
