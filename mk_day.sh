@@ -12,5 +12,8 @@ mkdir -p ./$year/$day
 if [ ! -f ./$year/$day/sol.py ]; then
   cp scaffold.py ./$year/$day/sol.py
 fi
-touch ./$year/$day/real_data.txt
+if [ ! -f ./$year/$day/real_data.txt ]; then
+  python3 pull_input.py -y $1 -d $2 > ./$year/$day/real_data.txt
+fi
 touch ./$year/$day/sample_data.txt
+echo "pushd ./$year/$day/"
