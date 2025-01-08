@@ -97,6 +97,7 @@ if __name__ == "__main__":
   prev_val = 0
   REG_A, oREG_B, oREG_C, PROGRAM = parse_puzzle_input(args.real, args.sample_file)
   OPCODES = [adv, bxl, bst, jnz, bxc, out, bdv, cdv]
+  last_len = 0
   while True:
     REG_A = test_a_val
     REG_B = oREG_B
@@ -113,13 +114,18 @@ if __name__ == "__main__":
         if PROGRAM[obi] != OUTPUT_BUFFER[obi]:
           break
       
-      if len(OUTPUT_BUFFER) > 0 and OUTPUT_BUFFER == PROGRAM[0:len(OUTPUT_BUFFER)]:
+      if len(OUTPUT_BUFFER) > 3 and OUTPUT_BUFFER == PROGRAM[len(PROGRAM) - len(OUTPUT_BUFFER):]:
         print("{} - {}".format(test_a_val - prev_val, test_a_val))
         prev_val = test_a_val
         break
 
       OPCODES[inst](operand)
-
+      #print(inst, operand, (REG_A, REG_B, REG_C), OUTPUT_BUFFER)
+      #input()
+    
+    #if last_len != len(OUTPUT_BUFFER):
+    #  print("{}:{} -- {},{} -- {}".format(OUTPUT_BUFFER, len(OUTPUT_BUFFER), PROGRAM, len(PROGRAM), test_a_val))
+    #  last_len = len(OUTPUT_BUFFER)
     if PROGRAM == OUTPUT_BUFFER:
       print(test_a_val)
       break

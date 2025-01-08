@@ -1,1 +1,5 @@
 Nothing found by: 19640000
+Okay, number of members of the output buffer increase about 1/order of magnitude.
+Hard low:  10000000000000
+Hard high: 1000000000000000
+           

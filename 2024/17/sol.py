@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
   # --------------------- Part 2 --------------------- #
 
-  test_a_val = 0
+  test_a_val = 19640000
   REG_A, oREG_B, oREG_C, PROGRAM = parse_puzzle_input(args.real, args.sample_file)
   OPCODES = [adv, bxl, bst, jnz, bxc, out, bdv, cdv]
   while True:
