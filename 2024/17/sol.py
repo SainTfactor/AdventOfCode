@@ -93,7 +93,14 @@ if __name__ == "__main__":
 
   # --------------------- Part 2 --------------------- #
 
-  test_a_val = 19640000
+  test_a_val = 35184372088831 # experimentally derived lowest possible number (lower than this the output buffer is too short)
+  test_a_val = 105484372088831 # dig 1
+  test_a_val = 105691372088831 # dig 2
+  test_a_val = 105705592088831 # dig 3
+  test_a_val = 105706258088831 # dig 4
+  test_a_val = 105706275388831
+  test_a_val = 105706277558831
+  test_a_val = 105706277634031
   REG_A, oREG_B, oREG_C, PROGRAM = parse_puzzle_input(args.real, args.sample_file)
   OPCODES = [adv, bxl, bst, jnz, bxc, out, bdv, cdv]
   while True:
@@ -120,5 +127,8 @@ if __name__ == "__main__":
     else:
       test_a_val += 1
 
-    if test_a_val % 10000 == 0:
-      print(test_a_val)
+    #if test_a_val % 1 == 0:
+    #  print(test_a_val)
+    #  print(PROGRAM)
+    #  print(OUTPUT_BUFFER)
+    #  input()
