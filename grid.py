@@ -34,7 +34,17 @@ class Grid:
   def __iter__(self):
     for x,y in self.generate_grid_scan():
       yield self.at(x,y), x, y
-    
+
+  def rows(self):
+    num_rows = len(self._grid)
+    for row_id in range(num_rows):
+      yield self._grid[num_rows-row_id-1]
+  
+  def cols(self):
+    num_cols = len(self._grid[0])
+    for col_id in range(num_cols):
+      yield [i[col_id] for i in self._grid]
+
   # 0,0 is bottom left, so translation is needed
   def at(self, x,y):
     grid = self._grid
@@ -56,7 +66,7 @@ class Grid:
       raise Exception #out of bounds
     grid[len(grid)-y-1][x] = new_value
   
-  def print(self, print_function=lambda x: x):
+  def print(self, print_function=lambda x: str(x)):
     grid = self._grid
     for i in grid:
       print("".join([print_function(j) for j in i]))
@@ -128,6 +138,12 @@ class Grid:
         for item in region:
           all_matched_nodes.append(item)
     return regions
+
+  def find_start(self, target_char="S"):
+    for n,x,y in self:
+      if n == target_char:
+        return x,y
+    raise Exception("No start character found!")
 
   def _create_cost_grid(self, start_node, obstacle_list = ["#"]):
     self._cost_grid = Grid([[{ "tile" : item } for item in line] for line in self._grid])
